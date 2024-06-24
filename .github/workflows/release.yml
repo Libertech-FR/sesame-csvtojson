@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: copy sources
+        run: |
+          mkdir -p .debpkg/usr/bin
+          cp src/csvToJson.py .debpkg/usr/bin
+          chmod 755 .debpkg/usr/bin/csvToJson.py
+      - uses: jiro4989/build-deb-action@v3
+        with:
+           package: sesame-csvtojson
+           package_root: .debpkg
+           maintainer: Libertech
+           version: ${{ github.ref }} # refs/tags/v*.*.*
+           depends: 'phyton3'
+           desc: 'convert csv to json'
+           homepage: 'https://github.com/Libertech-FR/sesame-csvtojson'
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: sesame*
+          overwrite: true
+          file_glob: true
+
